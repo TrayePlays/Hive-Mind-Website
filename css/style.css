@@ -75,6 +75,7 @@ body {
 #topBarRight {
     display: flex;
     align-items: center;
+    padding: 35px;
 }
 
 #themeToggle {
@@ -104,7 +105,7 @@ h1 {
 #controlPanel {
     background: var(--card);
     padding: 25px;
-    border-radius: 10px;
+    border-radius: 25px;
     width: 350px;
     border: 1px solid var(--border);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
@@ -112,7 +113,7 @@ h1 {
 
 /* Inputs */
 input[type="text"] {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     border-radius: 6px;
     border: 1px solid var(--border);
@@ -140,6 +141,7 @@ button:hover {
 #cmdBox {
     margin-top: 15px;
     display: flex;
+    align-items: center;
     gap: 8px;
 }
 
@@ -176,7 +178,7 @@ select {
 
 /* Video */
 #videoContainer {
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 video {
@@ -325,7 +327,8 @@ body.fade-out {
 #settingsPopup {
     display: none;
     position: absolute;
-    top: 140px;
+    right: 22.5%;
+    top: 10%;
     background: var(--card);
     border: 1px solid var(--border);
     padding: 20px;
@@ -360,7 +363,7 @@ body.fade-out {
 #loginActions {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 76%;
 }
 
 #helpBubble {
@@ -401,10 +404,10 @@ body.fade-out {
 .btnBack {
     display: inline-block;
     margin-top: 10px;
-    padding: 10px 14px;
+    padding: 10px;
     background: var(--button);
-    color: white;
-    border-radius: 6px;
+    color: rgb(0, 0, 0);
+    /* border-radius: 6px; */
     text-decoration: none;
 }
 

@@ -3,6 +3,10 @@ if (!sessionStorage.getItem("authenticated")) {
     window.location.href = "index.html";
 }
 
+const pl = document.getElementById("connectedPlayer")
+
+pl.textContent = `Connected Client: ${sessionStorage.getItem("connectedUser")}`
+
 // Fade in page
 window.onload = () => {
     document.body.classList.add("fade-in");
