@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dark">
+    <div id="loadingOverlay">
+        <div id="loadingBox">
+            <div class="spinner"></div>
+            <div id="loadingText">Loading...</div>
+        </div>
+    </div>
+
+    <div id="topBar">
+        <div id="topBarContent">
+            <img src="assets/logo.png" id="logo">
+            <span id="brandText">Hive Mind</span>
+        </div>
+
+        <div id="topBarRight">
+            <div id="themeToggle">🌙</div>
+        </div>
+    </div>
+
+
+
+    <h1>Hive Mind Login</h1>
+
+    <div id="loginBox">
+        <h3>Enter Session ID</h3>
+        <input id="sessionInput" type="text" placeholder="Session ID">
+        <button id="loginBtn">Submit</button>
+        <div id="errorMsg"></div>
+    </div>
+
+    <script src="scripts/index.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Control Panel</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="dark">
+    <canvas id="pixelCanvas" width="128" height="72" style="display:none;"></canvas>
+    <div id="loadingOverlay">
+        <div id="loadingBox">
+            <div class="spinner"></div>
+            <div id="loadingText">Loading...</div>
+        </div>
+    </div>
+
+    <div id="topBar">
+        <div id="topBarContent">
+            <img src="assets/logo.png" id="logo">
+            <span id="brandText">Hive Mind</span>
+        </div>
+
+        <div id="topBarRight">
+            <div id="themeToggle">🌙</div>
+        </div>
+    </div>
+
+
+
+    <h1>Manage Your Client</h1>
+
+    <div id="controlPanel">
+
+        <div id="cmdBox">
+            <input type="text" id="cmdInput" placeholder="Enter command...">
+            <button id="cmdSubmit">Run</button>
+        </div>
+
+        <div id="shareRow">
+            <button id="shareBtn">Share Screen</button>
+            <button id="settingsBtn">⚙️</button>
+        </div>
+
+        <div id="settingsPopup">
+            <h3>Settings</h3>
+
+            <label>
+                Resolution:
+                (Higher resolutions take longer to load)
+                <select id="resolutionSelect">
+                    <option>16x9</option>
+                    <option>32x18</option>
+                    <option>64x36</option>
+                    <option>96x54</option>
+                    <option>128x72</option>
+                    <option>256x144</option>
+                    <option>320x180</option>
+                </select>
+            </label>
+
+            <label>
+                Mode:
+                <select id="colorModeSelect">
+                    <option value="bw">Black & White</option>
+                    <option value="grayscale">Grayscale</option>
+                    <option value="color">Color</option>
+                </select>
+            </label>
+
+
+            <button id="closeSettings">Close</button>
+        </div>
+
+
+        <div id="videoContainer">
+            <video id="screenVideo" autoplay playsinline></video>
+        </div>
+    </div>
+
+    <script src="scripts/control.js"></script>
+</body>
+
+</html>
