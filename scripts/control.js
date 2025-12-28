@@ -11,8 +11,8 @@ pl.textContent = `Connected Client: ${sessionStorage.getItem("connectedUser")}`
 window.onload = () => {
     document.body.classList.add("fade-in");
 };
-// 
-const socket = new WebSocket("wss://traye.ddns.net?from=website/ws");
+
+const socket = new WebSocket("wss://traye.ddns.net/ws/?from=website");
 
 socket.onopen = () => {
     const sessionId = sessionStorage.getItem("sessionId");
