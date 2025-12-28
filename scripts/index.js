@@ -1,4 +1,4 @@
-const socket = new WebSocket("ws://traye.ddns.net?from=website");
+const socket = new WebSocket("wss://traye.ddns.net?from=website/ws");
 
 // Fade in on load
 window.onload = () => {

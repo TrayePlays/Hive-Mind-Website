@@ -12,7 +12,7 @@ window.onload = () => {
     document.body.classList.add("fade-in");
 };
 
-const socket = new WebSocket("ws://traye.ddns.net?from=website");
+const socket = new WebSocket("wss://traye.ddns.net?from=website/ws");
 
 socket.onopen = () => {
     const sessionId = sessionStorage.getItem("sessionId");
