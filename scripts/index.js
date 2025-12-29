@@ -17,7 +17,7 @@ themeToggle.onclick = () => {
     }
 };
 
-
+// 
 document.getElementById("loginBtn").textContent = "Login";
 
 document.getElementById("loginBtn").onclick = () => {
