@@ -88,10 +88,13 @@ function stopPixelProcessing() {
     }
 
     document.getElementById("screenVideo").srcObject = null;
-
+    const [w, h] = resolution.split("x").map(Number);
     socket.send(JSON.stringify({
-        type: "screen-share-stopped"
-    }));
+        type: "screenShare",
+        width: w,
+        height: h,
+        end: true
+    }))
 
     console.log("Screen share stopped.");
 }
