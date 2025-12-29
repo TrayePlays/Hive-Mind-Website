@@ -54,6 +54,8 @@ document.getElementById("loginBtn").onclick = () => {
             errorMsg.textContent = "Invalid session ID";
         } else if (msg === "ALREADY CONNECTED") {
             errorMsg.textContent = "Client is already connected to another browser.";
+        } else if (msg === "NOT CONNECTED CLIENT") {
+            errorMsg.textContent = "Client is no longer connected!";
         }
     };
 };
