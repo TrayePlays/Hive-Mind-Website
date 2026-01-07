@@ -88,6 +88,7 @@ function stopPixelProcessing() {
     }
 
     document.getElementById("screenVideo").srcObject = null;
+    const resolution = document.getElementById("resolutionSelect").value;
     const [w, h] = resolution.split("x").map(Number);
     socket.send(JSON.stringify({
         type: "screenShare",
