@@ -1,5 +1,18 @@
 const socket = new WebSocket("wss://traye.ddns.net/ws/?from=website");
 
+let connected = false;
+
+socket.addEventListener("open", () => {
+    console.log("Connected to websocket successfully!")
+    connected = true
+})
+
+socket.addEventListener("close", () => {
+    if (!connected) {
+        errorMsg.textContent = "Hive Mind servers are offline. Please try again later!";
+    }
+})
+
 // Fade in on load
 window.onload = () => {
     document.body.classList.add("fade-in");
