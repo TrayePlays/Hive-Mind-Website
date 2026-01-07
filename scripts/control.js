@@ -48,7 +48,7 @@ socket.onclose = () => {
     }
 };
 
-let colorMode = document.getElementById("colorModeSelect");
+let colorMode = document.getElementById("colorModeSelect")
 
 document.getElementById("colorModeSelect").onchange = (e) => {
     colorMode = e.target.value;
@@ -71,8 +71,12 @@ document.getElementById("shareBtn").onclick = async () => {
         document.getElementById("screenVideo").srcObject = stream;
         videoTrack = stream.getVideoTracks()[0];
         videoTrack.onended = stopPixelProcessing;
+        const resolution = document.getElementById("resolutionSelect").value;
+        const [w, h] = resolution.split("x").map(Number);
         socket.send(JSON.stringify({
             type: "screenShare",
+            width: w,
+            height: h,
             start: true
         }))
 
@@ -167,6 +171,7 @@ const colorBlocks = [
     { r: 37, g: 23, b: 16, id: "brown_terracotta" },
     { r: 135, g: 106, b: 97, id: "light_gray_terracotta" },
     { r: 83, g: 58, b: 36, id: "brown_terracotta" },
+    { r: 229, g: 216, b: 183, id: "white_terracotta" },
 
     { r: 180, g: 0, b: 0, id: "redstone_block" },
     { r: 171, g: 27, b: 27, id: "nether_wart_block" },
@@ -199,14 +204,6 @@ const colorBlocks = [
     { r: 150, g: 150, b: 135, id: "diorite" },
     { r: 100, g: 100, b: 100, id: "andesite" },
 
-    { r: 143, g: 140, b: 125, id: "iron_ore" },
-    { r: 100, g: 100, b: 100, id: "coal_ore" },
-    { r: 129, g: 140, b: 143, id: "diamond_ore" },
-    { r: 150, g: 120, b: 80, id: "gold_ore" },
-    { r: 115, g: 90, b: 75, id: "copper_ore" },
-    { r: 70, g: 100, b: 150, id: "lapis_ore" },
-    { r: 90, g: 120, b: 90, id: "emerald_ore" },
-
     { r: 220, g: 220, b: 220, id: "iron_block" },
     { r: 255, g: 255, b: 255, id: "quartz_block" },
     { r: 255, g: 170, b: 0, id: "copper_block" },
@@ -216,32 +213,20 @@ const colorBlocks = [
     { r: 45, g: 22, b: 26, id: "nether_bricks" },
     { r: 100, g: 30, b: 30, id: "red_nether_bricks" },
 
-    { r: 200, g: 200, b: 200, id: "glass" },
-    { r: 255, g: 150, b: 150, id: "red_stained_glass" },
-    { r: 255, g: 200, b: 150, id: "orange_stained_glass" },
-    { r: 255, g: 255, b: 150, id: "yellow_stained_glass" },
-    { r: 150, g: 255, b: 150, id: "lime_stained_glass" },
-    { r: 150, g: 255, b: 255, id: "cyan_stained_glass" },
-    { r: 150, g: 150, b: 255, id: "blue_stained_glass" },
-    { r: 200, g: 150, b: 255, id: "purple_stained_glass" },
-    { r: 255, g: 150, b: 220, id: "pink_stained_glass" },
     { r: 226, g: 59, b: 59, id: "tnt" },
     { r: 167, g: 167, b: 167, id: "stone_bricks" },
     { r: 131, g: 98, b: 63, id: "crafting_table" },
     { r: 125, g: 91, b: 61, id: "furnace" },
-    { r: 143, g: 119, b: 72, id: "chest" },
     { r: 100, g: 67, b: 50, id: "barrel" },
-    { r: 200, g: 200, b: 200, id: "iron_door" },
-    { r: 180, g: 180, b: 180, id: "iron_trapdoor" },
     { r: 194, g: 178, b: 128, id: "sandstone" },
+    { r: 216, g: 204, b: 154, id: "smooth_sandstone" },
+    { r: 222, g: 207, b: 171, id: "end_stone" },
     { r: 151, g: 109, b: 77, id: "red_sandstone" },
     { r: 96, g: 96, b: 96, id: "basalt" },
+    { r: 221, g: 214, b: 165, id: "bone_block" },
     { r: 55, g: 55, b: 55, id: "blackstone" },
     { r: 30, g: 30, b: 30, id: "obsidian" },
     { r: 102, g: 76, b: 51, id: "note_block" },
-    { r: 170, g: 139, b: 98, id: "bookshelf" },
-    { r: 140, g: 140, b: 140, id: "cauldron" },
-    { r: 180, g: 180, b: 180, id: "hopper" },
     { r: 90, g: 60, b: 30, id: "composter" },
     { r: 120, g: 120, b: 120, id: "dispenser" },
     { r: 120, g: 120, b: 120, id: "dropper" },
