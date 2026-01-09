@@ -39,6 +39,14 @@ socket.onmessage = (event) => {
         if (stream) captureOneFrame();
     }
 
+    if (msg == "endScreenShare") {
+        if (stream) {
+            stream.getTracks().forEach(track => track.stop()); 
+        } 
+        stopPixelProcessing(); 
+        document.getElementById("screenVideo").srcObject = null;
+    }
+
     console.log("Server:", msg);
 };
 
