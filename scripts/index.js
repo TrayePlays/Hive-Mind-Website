@@ -13,7 +13,6 @@ socket.addEventListener("close", () => {
     }
 })
 
-// Fade in on load
 window.onload = () => {
     document.body.classList.add("fade-in");
 };
@@ -24,13 +23,12 @@ themeToggle.onclick = () => {
     document.body.classList.toggle("light");
 
     if (document.body.classList.contains("light")) {
-        themeToggle.textContent = "🌙"; // light mode → show moon
+        themeToggle.textContent = "🌙";
     } else {
-        themeToggle.textContent = "☀️"; // dark mode → show sun
+        themeToggle.textContent = "☀️";
     }
 };
 
-// 
 document.getElementById("loginBtn").textContent = "Login";
 
 document.getElementById("loginBtn").onclick = () => {

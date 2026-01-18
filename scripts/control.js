@@ -41,12 +41,18 @@ socket.onmessage = (event) => {
 
     if (msg == "endScreenShare") {
         if (stream) {
-            stream.getTracks().forEach(track => track.stop()); 
-        } 
-        stopPixelProcessing(); 
+            stream.getTracks().forEach(track => track.stop());
+        }
+        stopPixelProcessing();
         document.getElementById("screenVideo").srcObject = null;
     }
 
+    try {
+        const data = JSON.parse(msg)
+        if (data && data.type == "updLoc") {
+            screenShareLocation = data.location;
+        }
+    } catch { };
     console.log("Server:", msg);
 };
 
@@ -55,6 +61,9 @@ socket.onclose = () => {
         window.location.href = "index.html";
     }
 };
+
+let screenShareLocation = null;
+let lastFrame = null;
 
 let colorMode = document.getElementById("colorModeSelect")
 
@@ -221,7 +230,6 @@ const colorBlocks = [
     { r: 45, g: 22, b: 26, id: "nether_bricks" },
     { r: 100, g: 30, b: 30, id: "red_nether_bricks" },
 
-    { r: 226, g: 59, b: 59, id: "tnt" },
     { r: 167, g: 167, b: 167, id: "stone_bricks" },
     { r: 131, g: 98, b: 63, id: "crafting_table" },
     { r: 125, g: 91, b: 61, id: "furnace" },
@@ -355,12 +363,116 @@ function captureOneFrame() {
     sendPixelFrame(pixels, w, h);
 }
 
-function sendPixelFrame(pixels, width, height) {
+function getPixel(x, y) {
+    return pixels[y * width + x];
+}
+
+function buildScreenShareCommands(loc, width, height, pixels, prevPixels) {
+    const commands = [];
+    const used = new Array(width * height).fill(false);
+
+    const changed = new Array(width * height);
+    for (let i = 0; i < pixels.length; i++) {
+        changed[i] = !prevPixels || pixels[i] !== prevPixels[i];
+    }
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+
+            const idx = y * width + x;
+
+            if (!changed[idx] || used[idx]) continue;
+
+            const color = getPixel(x, y);
+
+            let endX = x;
+            while (
+                endX + 1 < width &&
+                !used[y * width + (endX + 1)] &&
+                changed[y * width + (endX + 1)] &&
+                getPixel(endX + 1, y) === color
+            ) {
+                endX++;
+            }
+
+            let endY = y;
+            let canExtend = true;
+
+            while (canExtend && endY + 1 < height) {
+                for (let xx = x; xx <= endX; xx++) {
+                    const idx2 = (endY + 1) * width + xx;
+                    if (
+                        used[idx2] ||
+                        !changed[idx2] ||
+                        getPixel(xx, endY + 1) !== color
+                    ) {
+                        canExtend = false;
+                        break;
+                    }
+                }
+                if (canExtend) endY++;
+            }
+
+            for (let yy = y; yy <= endY; yy++) {
+                for (let xx = x; xx <= endX; xx++) {
+                    used[yy * width + xx] = true;
+                }
+            }
+
+            const mcX1 = loc.x + x;
+            const mcY1 = loc.y + (height - y);
+            const mcX2 = loc.x + endX;
+            const mcY2 = loc.y + (height - endY);
+
+            commands.push(
+                `fill ${mcX1} ${Math.max(Math.min(mcY1, 319), -64)} ${loc.z} ${mcX2} ${Math.max(Math.min(mcY2, 319), -64)} ${loc.z} ${color}`
+            );
+        }
+    }
+
+    return commands;
+}
+
+function createWSRequest(socket) {
+    let id = 0
+    const pending = new Map()
+
+    socket.onmessage = (event) => {
+        const msg = JSON.parse(event.data)
+
+        if (msg.id && pending.has(msg.id)) {
+            pending.get(msg.id).resolve(msg.data)
+            pending.delete(msg.id)
+        }
+    }
+
+    return function request(type, data = {}) {
+        return new Promise((resolve, reject) => {
+            const reqId = ++id
+
+            pending.set(reqId, { resolve, reject })
+
+            socket.send(JSON.stringify({
+                id: reqId,
+                type,
+                data
+            }))
+        })
+    }
+}
+
+async function sendPixelFrame(pixels, width, height) {
+    if (screenShareLocation == null) {
+        const request = createWSRequest(socket)
+        const loc = await request("locReq");
+        screenShareLocation = loc;
+    }
+    const cmds = buildScreenShareCommands(screenShareLocation, width, height, pixels, lastPixels)
     socket.send(JSON.stringify({
         type: "screenShare",
         width,
         height,
-        pixels
+        commands: cmds
     }));
 }
 
