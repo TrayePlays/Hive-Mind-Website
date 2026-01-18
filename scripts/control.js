@@ -25,18 +25,26 @@ socket.onopen = () => {
     socket.send(sessionId); // re-authenticate
 };
 
-socket.onmessage = (event) => {
-    const msg = event.data;
+socket.onmessage = async (event) => {
+    let msg = event.data;
+    if (msg instanceof Blob) {
+        msg = await msg.text();
+    }
+
+    console.log("recieved: " + msg)
+    // Server requests a frame
+    if (msg === "requestFrame") {
+        console.log("was requested another frame")
+        if (stream) {
+            console.log("getting other frame")
+            await captureOneFrame();
+        }
+    }
 
     if (msg === "INVALID" || msg === "DISCONNECTED") {
         sessionStorage.clear();
         window.location.href = "index.html";
         return;
-    }
-
-    // Server requests a frame
-    if (msg === "requestFrame") {
-        if (stream) captureOneFrame();
     }
 
     if (msg == "endScreenShare") {
@@ -46,13 +54,17 @@ socket.onmessage = (event) => {
         stopPixelProcessing();
         document.getElementById("screenVideo").srcObject = null;
     }
-
-    try {
-        const data = JSON.parse(msg)
-        if (data && data.type == "updLoc") {
-            screenShareLocation = data.location;
-        }
-    } catch { };
+    if (typeof msg === "string" && msg.startsWith("{")) {
+        try {
+            const data = JSON.parse(msg)
+            if (data && data.type == "updLoc") {
+                console.log("updated location!")
+                screenShareLocation = data.location;
+            }
+        } catch (e) {
+            console.log(`ERROR: ${e.stack}`)
+        };
+    }
     console.log("Server:", msg);
 };
 
@@ -63,7 +75,7 @@ socket.onclose = () => {
 };
 
 let screenShareLocation = null;
-let lastFrame = null;
+let lastPixels = null;
 
 let colorMode = document.getElementById("colorModeSelect")
 
@@ -286,7 +298,7 @@ const multibit = [
     { b: 200, id: "snow" }
 ];
 
-function captureOneFrame() {
+async function captureOneFrame() {
     if (!stream) return;
 
     const canvas = document.getElementById("pixelCanvas");
@@ -360,20 +372,23 @@ function captureOneFrame() {
         pixels.push(blockId);
     }
 
-    sendPixelFrame(pixels, w, h);
+    await sendPixelFrame(pixels, w, h);
 }
 
-function getPixel(x, y) {
-    return pixels[y * width + x];
-}
+
 
 function buildScreenShareCommands(loc, width, height, pixels, prevPixels) {
     const commands = [];
     const used = new Array(width * height).fill(false);
+    lastPixels = pixels
 
     const changed = new Array(width * height);
     for (let i = 0; i < pixels.length; i++) {
         changed[i] = !prevPixels || pixels[i] !== prevPixels[i];
+    }
+
+    function getPixel(x, y) {
+        return pixels[y * width + x];
     }
 
     for (let y = 0; y < height; y++) {
@@ -429,28 +444,42 @@ function buildScreenShareCommands(loc, width, height, pixels, prevPixels) {
             );
         }
     }
-
     return commands;
 }
 
-function createWSRequest(socket) {
+function createWSRequest(socket, defaultTimeout = 5000) {
     let id = 0
     const pending = new Map()
 
-    socket.onmessage = (event) => {
-        const msg = JSON.parse(event.data)
+    socket.addEventListener("message", (event) => {
+        const message = event.data
 
-        if (msg.id && pending.has(msg.id)) {
-            pending.get(msg.id).resolve(msg.data)
-            pending.delete(msg.id)
+        if (typeof message === "string" && message.startsWith("{")) {
+            const msg = JSON.parse(message)
+
+            if (msg.id && pending.has(msg.id)) {
+                const { resolve, timeout } = pending.get(msg.id)
+
+                clearTimeout(timeout)
+                pending.delete(msg.id)
+
+                resolve(msg.data)
+            }
         }
-    }
+    })
 
-    return function request(type, data = {}) {
+    return function request(type, data = {}, timeoutMs = defaultTimeout) {
         return new Promise((resolve, reject) => {
             const reqId = ++id
 
-            pending.set(reqId, { resolve, reject })
+            const timeout = setTimeout(() => {
+                if (pending.has(reqId)) {
+                    pending.get(reqId).reject(new Error("Request timed out"))
+                    pending.delete(reqId)
+                }
+            }, timeoutMs)
+
+            pending.set(reqId, { resolve, reject, timeout })
 
             socket.send(JSON.stringify({
                 id: reqId,
@@ -461,20 +490,42 @@ function createWSRequest(socket) {
     }
 }
 
-async function sendPixelFrame(pixels, width, height) {
-    if (screenShareLocation == null) {
+let locationPromise = null
+
+function ensureLocation() {
+    if (screenShareLocation) return Promise.resolve(screenShareLocation)
+
+    if (!locationPromise) {
         const request = createWSRequest(socket)
-        const loc = await request("locReq");
-        screenShareLocation = loc;
+        locationPromise = request("locReq").then(loc => {
+            screenShareLocation = loc
+            return loc
+        })
     }
-    const cmds = buildScreenShareCommands(screenShareLocation, width, height, pixels, lastPixels)
+
+    return locationPromise
+}
+
+
+async function sendPixelFrame(pixels, width, height) {
+    await ensureLocation()
+
+    const cmds = buildScreenShareCommands(
+        screenShareLocation,
+        width,
+        height,
+        pixels,
+        lastPixels
+    )
+
     socket.send(JSON.stringify({
         type: "screenShare",
         width,
         height,
         commands: cmds
-    }));
+    }))
 }
+
 
 const settingsBtn = document.getElementById("settingsBtn");
 const settingsPopup = document.getElementById("settingsPopup");
